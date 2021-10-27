@@ -1,5 +1,5 @@
-# scht
-Stupid CH testing
+# schtt
+Stupid CH testing tool
 
 ## How to use
 

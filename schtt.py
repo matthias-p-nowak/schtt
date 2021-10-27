@@ -18,11 +18,12 @@ tests:
   tests:
 """
 ttpe: concurrent.futures.thread.ThreadPoolExecutor = None
-itpe: concurrent.futures.thread.ThreadPoolExecutor = None
+# thread pool for infrastructure
+itpe: concurrent.futures.thread.ThreadPoolExecutor = concurrent.futures.thread.ThreadPoolExecutor()
 
 def main():
     """
-    Use scht.py <config file>
+    Use schtt.py <config file>
     """
     global cfg,ttpe,itpe
     if len(sys.argv) < 2:
@@ -34,12 +35,6 @@ def main():
         cfg2=yaml.safe_load(cf)
         if cfg2 is not None:
             cfg.update(yaml.safe_load(cf))
-    # a threadpoolexecutor for the infrastructure
-    itpe=concurrent.futures.thread.ThreadPoolExecutor()
-    # only for the tests
-    with concurrent.futures.thread.ThreadPoolExecutor() as exec:
-        ttpe=exec
-
     logging.debug("ended")
 
 if __name__ == '__main__':
