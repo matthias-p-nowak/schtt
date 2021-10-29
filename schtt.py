@@ -1,41 +1,32 @@
 #!/usr/bin/python3.9
 import atexit
 import logging
-import jinja2
-import yaml
 import sys
-import concurrent.futures.thread
 
-cfg = {}
-defaultCFG = """
----
-endpoint:
-  - name: rhino
-    host: localhost
-    port: 5060
-concurrent: 5
-tests:
-  tests:
-"""
-ttpe: concurrent.futures.thread.ThreadPoolExecutor = None
-# thread pool for infrastructure
-itpe: concurrent.futures.thread.ThreadPoolExecutor = concurrent.futures.thread.ThreadPoolExecutor()
+import config
+import tester
+import transport
+
+
 
 def main():
     """
     Use schtt.py <config file>
     """
-    global cfg,ttpe,itpe
-    if len(sys.argv) < 2:
-        print(main.__doc__)
-        sys.exit(2)
-    cfg = yaml.safe_load(defaultCFG)
-    cfg_file = sys.argv[1]
-    with open(cfg_file) as cf:
-        cfg2=yaml.safe_load(cf)
-        if cfg2 is not None:
-            cfg.update(yaml.safe_load(cf))
-    logging.debug("ended")
+    global cfg
+    try:
+        if len(sys.argv) < 2:
+            print(main.__doc__)
+            sys.exit(2)
+        cfg_file = sys.argv[1]
+        with open(cfg_file) as cf:
+            config.update_config(cf)
+        transport.initialize()
+        tester.run_tests(sys.argv[2:])
+    except Exception as ex:
+        print(f'program aborted due to an exception {ex}')
+    finally:
+        logging.debug("ended")
 
 if __name__ == '__main__':
     atexit.register(print, 'good bye')
