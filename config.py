@@ -12,13 +12,17 @@ endpoints:
         host: localhost
         port: 5060
     transport: udp
-concurrent: 5
+concurrent: 1
 debug: 0
 """
+
 Config = yaml.safe_load(defaultCFG)
 
 
 def get_config(key: str, default):
+    """
+    returns a configuration setting or the default value
+    """
     global Config
     keys = key.split('.')
     val = Config
@@ -31,6 +35,9 @@ def get_config(key: str, default):
 
 
 def update_config(cf):
+    """
+    replace default with updated config
+    """
     cfg2 = yaml.safe_load(cf)
     if cfg2 is not None:
         Config.update(cfg2)

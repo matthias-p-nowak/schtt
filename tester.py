@@ -1,3 +1,6 @@
+""""
+Testing infrastructure
+"""
 import concurrent.futures.thread
 import logging
 import os
@@ -24,9 +27,9 @@ class TestRun():
             else:
                 self.test['name'] = tn
             fn = self.test['filename']
-            future_threads=[]
+            future_threads = []
             logging.info(f'running test {fn} -> {tn}')
-            if 'threads' not in self.test or not isinstance(self.test['threads'],list):
+            if 'threads' not in self.test or not isinstance(self.test['threads'], list):
                 logging.error(f' no defined threads in {fn}->{tn}')
                 return
             for t in self.test['threads']:
@@ -43,9 +46,9 @@ class TestRun():
             tn = self.test['name']
             fn = self.test['filename']
             if 'name' in t:
-                trn=t['name']
+                trn = t['name']
             else:
-                trn='unnamed thread'
+                trn = 'unnamed thread'
             logging.info(f'running thread {trn} for {fn}->{tn}')
             pprint.pprint(t)
         except Exception as ex:
@@ -75,6 +78,7 @@ def get_all_tests(items: list[str]):
                         tt['filename'] = ffn
                         yield tt
 
+
 def run_tests(tests: list[str]):
     logging.debug("running tests")
     num_concurrent = config.get_config('concurrent', 1)
@@ -84,7 +88,6 @@ def run_tests(tests: list[str]):
             sem_limit.acquire()
             tr = TestRun(tpe, t, sem_limit)
             res = tpe.submit(tr.run_test)
-
         for i in range(num_concurrent):
             sem_limit.acquire()
         logging.info('clear for shutdown')

@@ -1,12 +1,15 @@
 #!/usr/bin/python3.9
+"""
+simple ch testing tool
+"""
 import atexit
 import logging
 import sys
 
 import config
+import siptr
 import tester
-import transport
-
+import util
 
 
 def main():
@@ -21,12 +24,15 @@ def main():
         cfg_file = sys.argv[1]
         with open(cfg_file) as cf:
             config.update_config(cf)
-        transport.initialize()
+        siptr.initialize()
+        util.initialize()
         tester.run_tests(sys.argv[2:])
     except Exception as ex:
         print(f'program aborted due to an exception {ex}')
     finally:
+        siptr.shutdown()
         logging.debug("ended")
+
 
 if __name__ == '__main__':
     atexit.register(print, 'good bye')

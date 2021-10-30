@@ -31,6 +31,7 @@
           match:
             - firstline: "^100 "
             - body: xia
+        - action: stop
   finally:
     checks:
       - match: status
