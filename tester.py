@@ -84,6 +84,7 @@ def run_tests(tests: list[str]):
             sem_limit.acquire()
             tr = TestRun(tpe, t, sem_limit)
             res = tpe.submit(tr.run_test)
+
         for i in range(num_concurrent):
             sem_limit.acquire()
         logging.info('clear for shutdown')

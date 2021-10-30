@@ -1,10 +1,11 @@
 - name: test 1
   threads:
     - name: caller
-      data:
-        caller: +4797778239
-        callee: +4799980040
-      msgs:
+      actions:
+        - action: data
+          data:
+            caller: +4797778239
+            callee: +4799980040
         - name: x1
           connection:
           action: sipout
@@ -17,12 +18,20 @@
           body: |
             a=0 0 0 0
             m=4711
-          grab:
-            - expression: "CallSeq: (<sq>.*)"
+        - action: grab
+          matches:
+            - what: Callseq
+              expression: "(<sq>.*)"
               store:
                 sq: call_id
+        - action: debug
+          var: .
         - name: 100rel
           action: sipin
           match:
             - firstline: "^100 "
             - body: xia
+  finally:
+    checks:
+      - match: status
+        expression: passed
