@@ -4,10 +4,10 @@
       actions:
         - action: data
           data:
-            caller: +4797778239
-            callee: +4799980040
+            caller: "+4797778239"
+            callee: "+4799980040"
         - name: x1
-          connection:
+          connection: rhino
           action: sipout
           firstline: INVITE you
           headers: |
@@ -28,6 +28,7 @@
           var: .
         - name: 100rel
           action: sipin
+          connection: rhino
           match:
             - firstline: "^100 "
             - body: xia

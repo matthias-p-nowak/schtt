@@ -11,8 +11,14 @@ import yaml
 
 import config
 
+action_modules={}
+
+def add_action_module(name:str, action):
+    global  action_modules
+    action_modules[name]=action
 
 class TestRun():
+    data={}
     def __init__(self, tpe: concurrent.futures.thread.ThreadPoolExecutor, test, sem: threading.Semaphore):
         self.running = True
         self.tpe = tpe
@@ -50,9 +56,21 @@ class TestRun():
             else:
                 trn = 'unnamed thread'
             logging.info(f'running thread {trn} for {fn}->{tn}')
+            idx=0
+            while self.running:
+                if idx >= len(t['actions']):
+                    break;
+                step=t['actions'][idx]
+                action=step['action']
+                if action not in action_modules:
+                    s=f'action "{action}" is not implemented'
+                    logging.error(s)
+                    raise NotImplementedError(s)
+                idx=action_modules[action](self,step,idx,t)
             pprint.pprint(t)
         except Exception as ex:
-            logging.error(f' got an exception in run_thread {ex}')
+            logging.error(f' got an exception in run_thread {type(ex)}:{ex}')
+            raise ex
 
 
 def get_all_tests(items: list[str]):
