@@ -6,15 +6,22 @@
           data:
             caller: "+4797778239"
             callee: "+4799980040"
+        - action: debug
+          variable: .
         - name: x1
           connection: rhino
           action: sipout
-          firstline: INVITE you
+          firstline: OPTIONS sip:{{callee}}@172.17.0.2:5060 SIP/2.0
           headers: |
-            From: me
-            To: you
-            Subject: calling
-            Contact: top secret
+            Via: SIP/2.0/UDP 192.168.0.37:0;branch=z9hG4bK.37a3a784;rport;alias
+            From: sip:{{caller}}@192.168.0.37:0;tag=6a45f805
+            To: sip:21@172.17.0.2:5060
+            Call-ID: 1782970373@192.168.0.37
+            CSeq: 1 OPTIONS
+            Contact: sip:sipsak@192.168.0.37:0
+            Max-Forwards: 70
+            User-Agent: schtt
+            Accept: text/plain
           body: |
             a=0 0 0 0
             m=4711

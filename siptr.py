@@ -96,8 +96,8 @@ def initialize():
         incoming_timeout=config.get_config('incoming_timeout',5.0)
         end_points = config.get_config('endpoints', [])
         pprint.pprint(end_points)
-        for ep in end_points:
-            name = ep['name']
+        for name in end_points:
+            ep=end_points[name]
             eptype = ep['type']
             if eptype == 'sip':
                 transport = ep['transport']

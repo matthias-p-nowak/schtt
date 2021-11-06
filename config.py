@@ -1,9 +1,12 @@
+#
+"""configuration module"""
 import yaml
 
+# default configuration
 defaultCFG = """
 ---
 endpoints:
-  - name: rhino
+  rhino:
     type: sip
     local: 
         host: localhost

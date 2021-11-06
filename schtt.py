@@ -7,6 +7,7 @@ import logging
 import sys
 
 import config
+import siphandler
 import siptr
 import tester
 import util
@@ -26,6 +27,7 @@ def main():
             config.update_config(cf)
         siptr.initialize()
         util.initialize()
+        siphandler.initialize()
         tester.run_tests(sys.argv[2:])
     except Exception as ex:
         print(f'program aborted due to an exception {ex}')
@@ -36,7 +38,8 @@ def main():
 
 if __name__ == '__main__':
     atexit.register(print, 'good bye')
-    logging.basicConfig(filename='debug.log', level=logging.DEBUG, filemode='w',
-                        format='%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d %(funcName)s: %(message)s', )
+    # ^([0-9-\s:,]+)\s+\[(\w+)]\s+([^\s]+)\s([\w:<>]+)+(.+)$
+    logging.basicConfig(filename='debug.log', level=logging.DEBUG, filemode='wt',
+                        format='%(asctime)s [%(levelname)s]\t%(pathname)s:%(lineno)d\t%(funcName)s: %(message)s', )
     logging.debug('started')
     main()

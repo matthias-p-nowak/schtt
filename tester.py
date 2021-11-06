@@ -6,19 +6,18 @@ import logging
 import os
 import pprint
 import threading
+from datetime import datetime
+from typing import Callable
 
 import yaml
 
 import config
+import tester
 
-action_modules={}
-
-def add_action_module(name:str, action):
-    global  action_modules
-    action_modules[name]=action
 
 class TestRun():
-    data={}
+    data = {}
+
     def __init__(self, tpe: concurrent.futures.thread.ThreadPoolExecutor, test, sem: threading.Semaphore):
         self.running = True
         self.tpe = tpe
@@ -35,6 +34,11 @@ class TestRun():
             fn = self.test['filename']
             future_threads = []
             logging.info(f'running test {fn} -> {tn}')
+            pp=os.path.join('logs',fn)
+            os.makedirs(pp,exist_ok=True)
+            logf=open(os.path.join(pp,tn+'.txt'),'wt')
+            now=datetime.now().strftime('%Y-%m-%d %X')
+            print(f'tested at {now}',file=logf)
             if 'threads' not in self.test or not isinstance(self.test['threads'], list):
                 logging.error(f' no defined threads in {fn}->{tn}')
                 return
@@ -46,8 +50,11 @@ class TestRun():
             logging.error(f' got an exception {ex}')
         finally:
             self.sem.release()
+            if logf is not None:
+                logf.close()
 
     def run_thread(self, t):
+        global action_modules
         try:
             tn = self.test['name']
             fn = self.test['filename']
@@ -56,28 +63,43 @@ class TestRun():
             else:
                 trn = 'unnamed thread'
             logging.info(f'running thread {trn} for {fn}->{tn}')
-            idx=0
+            pp=os.path.join('logs',fn,tn)
+            os.makedirs(pp,exist_ok=True)
+            logf=open(os.path.join(pp,trn+".txt"),'wt')
+            t['logf']=logf
+            idx = 0
             while self.running:
                 if idx >= len(t['actions']):
                     break;
-                step=t['actions'][idx]
-                action=step['action']
+                step = t['actions'][idx]
+                action = step['action']
                 if action not in action_modules:
-                    s=f'action "{action}" is not implemented'
+                    s = f'action "{action}" is not implemented'
                     logging.error(s)
+                    print(s,file=logf)
                     raise NotImplementedError(s)
-                idx=action_modules[action](self,step,idx,t)
+                idx = action_modules[action](self, step, idx, t)
             pprint.pprint(t)
         except Exception as ex:
             logging.error(f' got an exception in run_thread {type(ex)}:{ex}')
             raise ex
+        finally:
+            if logf is not None:
+                logf.close()
+
+action_modules: dict[str, Callable[[TestRun, dict, int, dict], int]] = {}
+
+
+def add_action_module(name: str, action):
+    global action_modules
+    action_modules[name] = action
 
 
 def get_all_tests(items: list[str]):
     for it in items:
-        for dirpath, dirnames, filenames in os.walk(it):
+        for dir_path, dir_names, filenames in os.walk(it):
             for fn in filenames:
-                ffn = os.path.join(dirpath, fn)
+                ffn = os.path.join(dir_path, fn)
                 with open(ffn) as inp:
                     tt = yaml.safe_load(inp)
                     if isinstance(tt, list):
