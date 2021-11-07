@@ -12,37 +12,43 @@ from typing import Callable
 import yaml
 
 import config
-import tester
 
 
-class TestRun():
+class TestCaseRun:
+    running: bool
     data = {}
 
-    def __init__(self, tpe: concurrent.futures.thread.ThreadPoolExecutor, test, sem: threading.Semaphore):
+    def __init__(self, tpe: concurrent.futures.thread.ThreadPoolExecutor, testcase:dict, sem: threading.Semaphore):
         self.running = True
+        """stop all loops when test case is no longer running"""
         self.tpe = tpe
-        self.test = test
+        """use this ThreadPoolExecutor for threads"""
+        self.testcase = testcase
+        """Test case to try"""
         self.sem = sem
-
-    def run_test(self):
+        """when test case is done, release this semaphore 
+            - it is used to limit the number of concurrent test case executions"""
+    def run_testcase(self):
+        """Runs a single testcase"""
         try:
             tn = 'test-not-named'
-            if 'name' in self.test:
-                tn = self.test['name']
+            if 'name' in self.testcase:
+                tn = self.testcase['name']
             else:
-                self.test['name'] = tn
-            fn = self.test['filename']
+                self.testcase['name'] = tn
+            fn = self.testcase['filename']
             future_threads = []
             logging.info(f'running test {fn} -> {tn}')
-            pp=os.path.join('logs',fn)
-            os.makedirs(pp,exist_ok=True)
-            logf=open(os.path.join(pp,tn+'.txt'),'wt')
-            now=datetime.now().strftime('%Y-%m-%d %X')
-            print(f'tested at {now}',file=logf)
-            if 'threads' not in self.test or not isinstance(self.test['threads'], list):
+            pp = os.path.join('logs', fn)
+            os.makedirs(pp, exist_ok=True)
+            logf = open(os.path.join(pp, tn + '.txt'), 'wt')
+            now = datetime.now().strftime('%Y-%m-%d %X')
+            print(f'tested at {now}', file=logf)
+            if 'threads' not in self.testcase or not isinstance(self.testcase['threads'], list):
                 logging.error(f' no defined threads in {fn}->{tn}')
                 return
-            for t in self.test['threads']:
+            for t in self.testcase['threads']:
+                ttr=TestThreadRun(self, t)
                 res = self.tpe.submit(self.run_thread, t)
                 future_threads.append(res)
             concurrent.futures.wait(future_threads)
@@ -56,17 +62,17 @@ class TestRun():
     def run_thread(self, t):
         global action_modules
         try:
-            tn = self.test['name']
-            fn = self.test['filename']
+            tn = self.testcase['name']
+            fn = self.testcase['filename']
             if 'name' in t:
                 trn = t['name']
             else:
                 trn = 'unnamed thread'
             logging.info(f'running thread {trn} for {fn}->{tn}')
-            pp=os.path.join('logs',fn,tn)
-            os.makedirs(pp,exist_ok=True)
-            logf=open(os.path.join(pp,trn+".txt"),'wt')
-            t['logf']=logf
+            pp = os.path.join('logs', fn, tn)
+            os.makedirs(pp, exist_ok=True)
+            logf = open(os.path.join(pp, trn + ".txt"), 'wt')
+            t['logf'] = logf
             idx = 0
             while self.running:
                 if idx >= len(t['actions']):
@@ -76,7 +82,7 @@ class TestRun():
                 if action not in action_modules:
                     s = f'action "{action}" is not implemented'
                     logging.error(s)
-                    print(s,file=logf)
+                    print(s, file=logf)
                     raise NotImplementedError(s)
                 idx = action_modules[action](self, step, idx, t)
             pprint.pprint(t)
@@ -87,7 +93,18 @@ class TestRun():
             if logf is not None:
                 logf.close()
 
-action_modules: dict[str, Callable[[TestRun, dict, int, dict], int]] = {}
+
+class TestThreadRun:
+    data = {}
+
+    def __init__(self,tc: TestCaseRun, t:dict):
+        self.parent=tc
+        self.data.update(tc.data)
+        pass
+    def run_test(self):
+        pass
+
+action_modules: dict[str, Callable[[TestCaseRun, dict, int, dict], int]] = {}
 
 
 def add_action_module(name: str, action):
@@ -124,10 +141,10 @@ def run_tests(tests: list[str]):
     num_concurrent = config.get_config('concurrent', 1)
     sem_limit = threading.Semaphore(num_concurrent)
     with concurrent.futures.ThreadPoolExecutor() as tpe:
-        for t in get_all_tests(tests):
+        for testcase in get_all_tests(tests):
             sem_limit.acquire()
-            tr = TestRun(tpe, t, sem_limit)
-            res = tpe.submit(tr.run_test)
+            tr = TestCaseRun(tpe, testcase, sem_limit)
+            res = tpe.submit(tr.run_testcase)
         for i in range(num_concurrent):
             sem_limit.acquire()
         logging.info('clear for shutdown')

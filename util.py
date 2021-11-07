@@ -34,7 +34,7 @@ def merge(source, dest):
     else:
       dest[key]=value
 
-def add_data(tr: tester.TestRun, stepdata: dict, step: int, td: dict) -> int:
+def add_data(tr: tester.TestCaseRun, stepdata: dict, step: int, td: dict) -> int:
     logging.debug(f'step {step} - adding data')
     f = td['logf']
     print(f'----- step {step} - adding data -----', file=f)
@@ -55,7 +55,7 @@ def add_data(tr: tester.TestRun, stepdata: dict, step: int, td: dict) -> int:
     return step + 1
 
 
-def debug_var(tr: tester.TestRun, stepdata: dict, step: int, td: dict) -> int:
+def debug_var(tr: tester.TestCaseRun, stepdata: dict, step: int, td: dict) -> int:
     logging.debug(f'step {step} - debug variable')
     key = stepdata['variable']
     f = td['logf']

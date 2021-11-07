@@ -1,5 +1,7 @@
-#
-"""configuration module"""
+"""
+configuration module
+defaultCFG contains an example
+"""
 import yaml
 
 # default configuration
@@ -16,10 +18,11 @@ endpoints:
         port: 5060
     transport: udp
 concurrent: 1
-debug: 0
+debug: 40
 """
 
 Config = yaml.safe_load(defaultCFG)
+"""The default configuration"""
 
 
 def get_config(key: str, default):

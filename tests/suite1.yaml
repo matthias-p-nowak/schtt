@@ -1,11 +1,10 @@
 - name: test 1
+  data:
+    caller: "+4797778239"
+    callee: "+4799980040"
   threads:
     - name: caller
       actions:
-        - action: data
-          data:
-            caller: "+4797778239"
-            callee: "+4799980040"
         - action: debug
           variable: .
         - name: x1

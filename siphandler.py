@@ -1,4 +1,6 @@
-"""contains the sip related actions"""
+"""
+contains the sip related actions
+"""
 import logging
 
 import sipmsg
@@ -6,7 +8,7 @@ import tester
 import util
 
 
-def do_sipout(tr: tester.TestRun, stepdata: dict, step: int, td: dict) -> int:
+def do_sipout(tr: tester.TestCaseRun, stepdata: dict, step: int, td: dict) -> int:
     logging.debug(f'step {step} - sipout')
     f = td['logf']
     print(f'----- step {step} - sending sip -----', file=f)
