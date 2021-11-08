@@ -9,9 +9,12 @@ import util
 
 
 def do_sipout(tr: tester.TestCaseRun, stepdata: dict, step: int, td: dict) -> int:
-    logging.debug(f'step {step} - sipout')
+    """
+    executes the sipout action
+    """
+    logging.debug(f"step {step} - sipout")
     f = td['logf']
-    print(f'----- step {step} - sending sip -----', file=f)
+    print(f"----- step {step} - sending sip -----", file=f)
     data = {}
     util.merge(tr.data, data)
     util.merge({'t': td}, data)
@@ -30,8 +33,11 @@ def do_sipout(tr: tester.TestCaseRun, stepdata: dict, step: int, td: dict) -> in
 
 
 def initialize():
+    """
+    registers the sip handler actions
+    """
     try:
-        logging.info('initializing siphandler')
+        logging.info("initializing siphandler")
         tester.add_action_module('sipout', do_sipout)
     except Exception as ex:
         logging.error(f"got an exception {ex}")

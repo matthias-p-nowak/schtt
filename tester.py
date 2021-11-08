@@ -15,6 +15,9 @@ import config
 
 
 class TestCaseRun:
+    """
+    infrastructure to run a testcase contain one or more threads
+    """
     running: bool
     data = {}
 

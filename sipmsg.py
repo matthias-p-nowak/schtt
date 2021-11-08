@@ -5,13 +5,24 @@ import logging
 
 
 class SipMessage:
+    """
+    full sip message decomposed into components
+    """
     firstline: str=''
+    """the first line of request or response"""
+    # headers can be repeated, VIA, Record-Route, Route
     headers: dict[str, list[str]]={}
+    """"all headers"""
+    # body as one single string, since there is no manipulation in here
     body: str=''
+    # storing special elements separate after parsing
     call_id: str=''
     cseq: int=0
 
     def __init__(self, fl: str, hdrs: str, body: str):
+        """
+        build a SIP-message from it's main component, also extracts special elements
+        """
         logging.debug("constructing sipmessage from parts")
         if body is None:
             self.body = ''
@@ -29,5 +40,6 @@ class SipMessage:
         self.firstline = fl.strip()
         # TODO call_id, cseq
 
-    def __int__(self, msg: str):
+    def __init__(self, msg: str):
+        """analyzes msg and extracts the parts"""
         logging.debug("constructing sipmessage from message")

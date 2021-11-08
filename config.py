@@ -4,7 +4,7 @@ defaultCFG contains an example
 """
 import yaml
 
-# default configuration
+# default configuration as here-doc
 defaultCFG = """
 ---
 endpoints:

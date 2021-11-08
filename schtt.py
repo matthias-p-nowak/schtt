@@ -40,7 +40,7 @@ def main():
         # running tests
         tester.run_tests(sys.argv[2:])
     except Exception as ex:
-        print(f'program aborted due to an exception {ex}')
+        print(f"program aborted due to an exception {ex}")
     finally:
         # close connections
         siptr.shutdown()
@@ -49,6 +49,6 @@ def main():
 
 if __name__ == '__main__':
     """entry point for main"""
-    atexit.register(print, 'good bye')
+    atexit.register(print, "good bye")
     # startup done, doing main
     main()
