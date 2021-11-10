@@ -18,7 +18,10 @@ incoming_timeout: float = 0.0
 
 
 class IncomingSipMsg():
-    """storing incoming messages in a linked list"""
+    """
+    storing incoming messages in a linked list
+    this class is a node in the linked list with support for blocking
+    """
     next: 'IncomingSipMsg'
     """the next incoming message"""
     signal: threading.Event
@@ -33,7 +36,7 @@ class IncomingSipMsg():
         self.msg = msg
         self.handled = handled
 
-
+# module variables
 incoming_msgs = IncomingSipMsg(None, handled=True)
 """starting point for the linked list"""
 incoming_msgs_lock: Lock = threading.Lock()
@@ -74,9 +77,10 @@ def add_incoming_msg(msg: IncomingSipMsg):
         while msg.next is not None:
             if msg.next.handled:
                 msg.next = msg.next.next
-            elif msg.obsolete < now:
-                log_unhandled_msg(msg)
-                msg.next = msg.next.next
+            # checking for obsolete is unnecessary
+            # elif msg.obsolete < now:
+            #     log_unhandled_msg(msg)
+            #     msg.next = msg.next.next
             else:
                 msg = msg.next
         # First, add the next message
@@ -111,6 +115,8 @@ class SipUdpHandler(socketserver.BaseRequestHandler):
         # TODO handle a request - aka reading from socket
         logging.debug(f"got {pprint.pformat(self.request)}")
         # TODO add the message to the incoming list
+        # parse message
+        # add it to the linked list
 
 
 class SipUdpServer:
